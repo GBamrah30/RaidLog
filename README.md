@@ -1,165 +1,173 @@
 # Python-Enabled RAID Log
 
-An Excel-based RAID log for project managers, powered by embedded Python automation.
-One file. Real buttons. Real automation. No coding required by the buyer.
+An automated RAID log built in Excel and powered by embedded Python.
+Buttons inside the workbook trigger Python scripts that handle the
+repetitive work of running a project log — colour-coding, flagging
+stale items, building dashboards, generating reports — so project
+managers can focus on the work, not the log.
+
+> Built as part of a digital-products line for project managers.
+> This repo holds the Python automation layer and project documentation.
 
 ---
 
-## What It Is
+## Why I Built This
 
-A pre-formatted `.xlsm` workbook that turns the standard PM-favourite RAID log into
-an automated tool. Buttons inside the workbook run Python scripts that handle the
-tedious, recurring parts of RAID management — flagging overdue items, building
-dashboards, generating status reports — so PMs can spend their time on the work
-itself rather than on log maintenance.
+Project managers live in RAID logs. Most of them are static Excel
+files that require constant manual upkeep — conditional formatting,
+sorting, status-chasing, weekly report rebuilds. That's hours of
+work every week that doesn't add any project value.
 
-Designed for PMs who already use Excel-based RAID logs and want to upgrade to
-something faster, cleaner, and more presentation-ready without changing tools.
+This tool puts the routine work behind buttons. The PM clicks
+**Flag Status** and every row colour-codes itself based on status
+and due date. They click **Refresh Dashboard** and the project's
+state rebuilds visually in seconds. The log stops being a chore
+and starts being a tool.
 
----
-
-## Who It's For
-
-- Project managers running one or more active projects
-- PMOs standardising RAID practices across teams
-- Consultants and fractional PMs who report to leadership on a regular cadence
-- Anyone tired of manually colour-coding overdue items every week
+It's also a deliberate exercise in building something sellable as
+a solo developer — a single `.xlsm` file that ships with embedded
+Python, distributed via Gumroad.
 
 ---
 
-## The Four Editions
+## How It Works
 
-### Lite — Free
+The architecture is three layers stitched together:
 
-A pre-formatted RAID log workbook plus one automation feature, so you can see how
-the tool works before paying for anything.
+**Excel** — the interface. A pre-formatted workbook with a Home
+tab full of buttons, a clean RAID Log structure, and supporting
+tabs for outputs (Dashboard, Weekly Report, My Items).
 
-**Includes**
-- Pre-formatted RAID log workbook with built-in column structure, formulas, and
-  data validation
-- **Flag Status** — colour-codes the ID cell based on Status and Due Date
-  (red / amber / green / grey, with self-cleaning before each run)
-- Home tab with branded layout
-- Setup guide
+**VBA** — the trigger layer. Each button on the Home tab calls a
+small VBA macro that hands control over to Python via `xlwings`'
+`RunPython` mechanism.
 
-Email capture on download. Free updates within the Lite tier.
+**Python** — the engine. The `raid_functions` module holds every
+piece of automation logic. It reads the workbook in bulk (to avoid
+slow per-cell round-trips), runs the logic in memory, and writes
+results back with screen updating frozen for speed.
 
----
-
-### Standard — $15
-
-The complete automated RAID log for day-to-day project management.
-
-**Adds**
-- **Mark Stale** — flags rows untouched for 14+ days based on dated entries in
-  the Actions Taken column
-- **Refresh Dashboard** — rebuilds a native Excel dashboard with stat cards and
-  breakdowns by category, owner, and criticality
-- **Generate Weekly Report** — writes a dated status snapshot to a dedicated tab
-- **Show My Items** — filters the log to one owner on its own tab
-
-*Best for* PMs who manage one or two projects and want their log to do the
-recurring work for them.
+When packaged for distribution, the Python code is embedded
+directly inside the `.xlsm` using `xlwings code embed`, so the
+buyer downloads a single file with no external dependencies
+beyond Python itself.
 
 ---
 
-### Pro — $20
+## Features
 
-Everything in Standard, plus the features that make reporting and sharing
-effortless.
+**Flag Status** — colour-codes the ID cell on every row based on
+Status and Due Date. Cancelled items grey, complete green, overdue
+red, due-within-7-days amber, on-track green. Idempotent — clears
+its previous output before reapplying so the log stays accurate
+as data changes.
 
-**Adds**
-- **Export to PDF** — one-click PDF export of the Weekly Report
-- **Email Summary** — pops open a pre-filled Outlook draft with the status
-  summary ready to send to stakeholders (Windows + Outlook desktop)
+**Mark Stale** — parses dated entries from the Actions Taken
+column (users prefix updates with `08-May-26: chased vendor`)
+and flags rows that haven't had a dated update in 14+ days.
 
-*Best for* PMs and consultants who deliver written status updates on a regular
-cadence and want to eliminate the formatting-and-emailing overhead.
+**Refresh Dashboard** — rebuilds a Dashboard tab with stat cards
+(overdue, due this week, open, complete), breakdowns by RAID
+Category and Owner, and a criticality grouping.
 
----
+**Generate Weekly Report** — writes a dated, formatted status
+snapshot to the Weekly Report tab. Sections for overdue, due this
+week, and in-progress items.
 
-### Pro+ — $35
+**Show My Items** — filters the log to a single owner (selected
+from a dropdown on the Home tab) and writes the filtered view to
+its own tab.
 
-The full automation suite. Built for PMs who report to leadership weekly or
-manage portfolios where polished output matters.
-
-**Adds**
-- **PowerPoint Status Report Generator** — generates a branded, dated status deck
-  from the RAID data using a customisable template. Title slide, status overview,
-  overdue items, upcoming items, and owner breakdown — auto-built each week.
-- **Visual Dashboard Upgrade** — Plotly-powered charts (rendered as images on the
-  Dashboard tab) replace the native Excel charts for a more polished look.
-
-*Best for* senior PMs, programme managers, and PMOs reporting to leadership.
-The PowerPoint export alone replaces 30–60 minutes of weekly deck building.
+Future features under development: PDF export, Outlook email
+draft generation, PowerPoint status deck generator, and a
+visually upgraded dashboard using Plotly-rendered charts.
 
 ---
 
-## Future Direction (Roadmap)
+## Tech Stack
 
-Beyond Pro+, the product can grow into adjacent territory:
-
-- **Multi-project portfolio view** — one workbook, multiple RAID logs, rolled-up
-  dashboards and reports across all projects
-- **Standalone executable (.exe) distribution** — removes the need for buyers to
-  install Python; the tool runs out of the box
-- **Web-based companion dashboard** — a hosted Streamlit or Dash app that reads
-  from the RAID log and presents a real-time interactive dashboard, sold as a
-  subscription add-on
-- **Integration hooks** — pull RAID data into Power BI, Jira, or other PM tools
-
-These are exploratory and depend on real-world adoption of the paid tiers.
+- **Python 3** — automation logic
+- **xlwings** — Python ↔ Excel bridge
+- **openpyxl, pandas** — data manipulation
+- **VBA** — button triggers via `RunPython` macros
+- **Excel** — the host environment and UI
 
 ---
 
 ## Workbook Structure
 
-Every edition is built around the same clean, consistent structure:
+The workbook is built around a single combined RAID Log tab
+covering Risks, Actions, Issues, and Dependencies. Headers in
+row 1, data from row 2, no blank rows in the middle (so the
+data-detection logic works cleanly).
 
-- **Home tab** (leftmost) — control panel with buttons and selectors
-- **Instructions tab** — short user guide
-- **RAID Log tab** — the data: 18 columns A–R, headers in row 1, data from row 2,
-  no blank rows in the middle
-- **Dashboard tab** — built by Refresh Dashboard (Standard+)
-- **Weekly Report tab** — built by Generate Weekly Report (Standard+)
-- **My Items tab** — built by Show My Items (Standard+)
+The full structure:
 
----
-
-## How It Works (For Buyers)
-
-1. Download the `.xlsm` file
-2. Install Python once (one-time setup, ~5 minutes, guided step-by-step)
-3. Open the workbook, fill in your RAID data, click the automation buttons
-4. The tool handles the rest
-
-A short setup guide is included with every purchase.
+- **Home** — control panel with buttons
+- **Instructions** — short user guide
+- **RAID Log** — the data (18 columns A–R)
+- **Dashboard** — built by Refresh Dashboard
+- **Weekly Report** — built by Generate Weekly Report
+- **My Items** — built by Show My Items
 
 ---
 
-## What's Out of Scope
+## Engineering Notes
 
-This tool is intentionally focused. It is **not**:
-- A replacement for full PM platforms (Asana, Monday, Jira)
-- A real-time multi-user collaboration tool
-- A risk management methodology framework
-- A consulting service (though it makes consulting easier)
+A few design decisions worth calling out:
 
-If you need any of the above, this tool can complement them, not replace them.
+**Idempotent functions.** Every automation can be re-run safely.
+Each function clears its own previous output before reapplying,
+which means the user can click the same button repeatedly without
+accumulating stale state. This matters for a tool used over many
+weeks.
+
+**Bulk reads, single-call writes where possible.** Per-cell
+Excel access is slow because each call crosses the Python/Excel
+process boundary. The functions bulk-read the data block in one
+call, do all logic in Python, and write back as efficiently as
+the formatting operations allow.
+
+**Screen updating frozen during writes.** Excel tries to repaint
+the screen between every cell change, which is both slow and
+visually jarring. Each function freezes screen updates at the
+start and restores them at the end.
+
+**Code embedded at packaging time.** The development version
+uses a separate `.py` file. For distribution, `xlwings code embed`
+pulls the Python into a hidden sheet inside the workbook so the
+buyer ships and runs one file.
 
 ---
 
-## Built By
+## Roadmap
 
-A PMP-certified project manager with five years of PM, reporting, and analytics
-experience — building the tool I wished existed.
+This repo represents the first version of the tool. Planned
+additions:
+
+- One-click PDF report export
+- Outlook email draft generation
+- Auto-generated PowerPoint status deck from RAID data
+- Plotly-powered visual dashboard upgrade
+- Multi-project portfolio rollup
+- Standalone executable distribution (no Python install required)
+- Companion web-based dashboard via Streamlit or Dash
 
 ---
 
-## License & Support
+## About
 
-Single-user license. Each purchase entitles one user to use the tool. Free updates
-within the same tier. Tier upgrades available at the price difference between
-your current tier and the new one.
+Built by Gagan — PMP-certified project manager with five years
+of project, reporting, and analytics experience, building the
+tools I wished existed during my own PM work.
 
-Support via email for setup issues within 30 days of purchase.
+The full, packaged version of the tool will be available on
+Gumroad. Watch this repo for release news.
+
+---
+
+## License
+
+This codebase is shared for portfolio and educational purposes.
+The compiled, sellable workbook is a separate licensed product.
+See LICENSE.md for terms once published.
