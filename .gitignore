@@ -1,0 +1,31 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Excel temp lock files (when file is open)
+~$*.xlsm
+~$*.xlsx
+
+# OS
+.DS_Store
+
+# ─────────────────────────────────────────────
+# Sellable product files — NOT for public repo
+# Ship these via Gumroad only
+# ─────────────────────────────────────────────
+
+# The fully-wired, sellable workbook
+RAID_Log.xlsm
+
+# Working drafts / private staging
+product/
+private/
